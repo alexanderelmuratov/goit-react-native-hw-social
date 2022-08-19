@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import * as Font from "expo-font";
-
-import RegistrationScreen from "./screens/auth/RegistrationScreen";
-import LoginScreen from "./screens/auth/LoginScreen";
+import { NavigationContainer } from "@react-navigation/native";
+import useRoute from "./router";
 
 const customFonts = {
   "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
@@ -12,6 +11,7 @@ const customFonts = {
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
+  const routing = useRoute({});
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -30,10 +30,5 @@ export default function App() {
     return null;
   }
 
-  return (
-    <>
-      <RegistrationScreen />
-      {/* <LoginScreen /> */}
-    </>
-  );
+  return <NavigationContainer>{routing}</NavigationContainer>;
 }

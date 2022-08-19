@@ -12,13 +12,16 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+import * as ScreenOrientation from "expo-screen-orientation";
+
+console.log(ScreenOrientation.getOrientationAsync());
 
 const initialFormData = {
   email: "",
   password: "",
 };
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   const [formData, setFormData] = useState(initialFormData);
   const [keyboardShown, setKeyboardShown] = useState(false);
 
@@ -63,7 +66,7 @@ export default function LoginScreen() {
                   }
                 />
                 <TextInput
-                  style={styles.input}
+                  style={{ ...styles.input, marginBottom: 0 }}
                   placeholder="Пароль"
                   secureTextEntry={true}
                   onFocus={() => setKeyboardShown(true)}
@@ -83,9 +86,15 @@ export default function LoginScreen() {
                   >
                     <Text style={styles.buttonTitle}>Войти</Text>
                   </TouchableOpacity>
-                  <Text style={styles.subTitle}>
-                    Нет аккаунта? Зарегистрироваться
-                  </Text>
+                  <TouchableOpacity
+                    style={{ marginTop: 16 }}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("Register")}
+                  >
+                    <Text style={styles.navigationTitle}>
+                      Нет аккаунта? Зарегистрироваться
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -140,7 +149,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     height: 50,
-    marginTop: 27,
+    marginTop: 43,
     backgroundColor: "#FF6C00",
     borderRadius: 100,
   },
@@ -149,8 +158,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
   },
-  subTitle: {
-    marginTop: 16,
+  navigationTitle: {
     fontFamily: "Roboto-Regular",
     fontSize: 16,
     textAlign: "center",

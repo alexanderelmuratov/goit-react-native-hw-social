@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
@@ -19,7 +19,7 @@ const initialFormData = {
   password: "",
 };
 
-export default function RegistrationScreen() {
+export default function RegistrationScreen({ navigation }) {
   const [formData, setFormData] = useState(initialFormData);
   const [keyboardShown, setKeyboardShown] = useState(false);
 
@@ -76,7 +76,7 @@ export default function RegistrationScreen() {
                   }
                 />
                 <TextInput
-                  style={styles.input}
+                  style={{ ...styles.input, marginBottom: 0 }}
                   placeholder="Пароль"
                   secureTextEntry={true}
                   onFocus={() => setKeyboardShown(true)}
@@ -96,7 +96,15 @@ export default function RegistrationScreen() {
                   >
                     <Text style={styles.buttonTitle}>Зарегистрироваться</Text>
                   </TouchableOpacity>
-                  <Text style={styles.subTitle}>Уже есть аккаунт? Войти</Text>
+                  <TouchableOpacity
+                    style={{ marginTop: 16 }}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("Login")}
+                  >
+                    <Text style={styles.navigationTitle}>
+                      Уже есть аккаунт? Войти
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -151,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     height: 50,
-    marginTop: 27,
+    marginTop: 43,
     backgroundColor: "#FF6C00",
     borderRadius: 100,
   },
@@ -160,8 +168,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
   },
-  subTitle: {
-    marginTop: 16,
+  navigationTitle: {
     fontFamily: "Roboto-Regular",
     fontSize: 16,
     textAlign: "center",
