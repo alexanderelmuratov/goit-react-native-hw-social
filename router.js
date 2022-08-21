@@ -34,9 +34,13 @@ export default function useRoute(isAuth) {
       screenOptions={{
         tabBarShowLabel: false,
         tabBarActiveBackgroundColor: "#FF6C00",
+        tabBarStyle: {
+          alignItems: "center",
+        },
         tabBarItemStyle: {
           marginHorizontal: 30,
-          marginTop: 8,
+          marginTop: 2,
+          marginBottom: 2,
           borderRadius: 20,
         },
       }}
@@ -46,8 +50,12 @@ export default function useRoute(isAuth) {
         component={PostsScreen}
         options={{
           headerShown: false,
-          tabBarIcon: () => (
-            <Ionicons name="grid-outline" size={24} color="#212121" />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="grid-outline"
+              size={focused ? 32 : 24}
+              color={focused ? "#FFFFFF" : "#212121"}
+            />
           ),
         }}
       />
@@ -56,8 +64,12 @@ export default function useRoute(isAuth) {
         component={CreatePostsScreen}
         options={{
           headerShown: false,
-          tabBarIcon: () => (
-            <Ionicons name="add-outline" size={24} color="#212121" />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="add-outline"
+              size={focused ? 32 : 24}
+              color={focused ? "#FFFFFF" : "#212121"}
+            />
           ),
         }}
       />
@@ -66,8 +78,12 @@ export default function useRoute(isAuth) {
         component={ProfileScreen}
         options={{
           headerShown: false,
-          tabBarIcon: () => (
-            <Ionicons name="person-outline" size={24} color="#212121" />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="person-outline"
+              size={focused ? 32 : 24}
+              color={focused ? "#FFFFFF" : "#212121"}
+            />
           ),
         }}
       />

@@ -26,6 +26,16 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(goit-react-native-hw-social) to access your photos.",
+          "savePhotosPermission": "Allow $(goit-react-native-hw-social) to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ]
   }
 }
