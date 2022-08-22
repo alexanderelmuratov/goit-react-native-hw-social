@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import * as Font from "expo-font";
+import { Provider } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 import useRoute from "./router";
+import { store } from "./redux/store";
+import db from "./firebase/config";
 
 const customFonts = {
   "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
@@ -11,7 +14,11 @@ const customFonts = {
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
-  const routing = useRoute({});
+  const [user, setUser] = useState(null);
+
+  db.auth().onAuthStateChanged((user) => setUser(user));
+
+  const routing = useRoute(user);
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -30,5 +37,9 @@ export default function App() {
     return null;
   }
 
-  return <NavigationContainer>{routing}</NavigationContainer>;
+  return (
+    <Provider store={store}>
+      <NavigationContainer>{routing}</NavigationContainer>
+    </Provider>
+  );
 }

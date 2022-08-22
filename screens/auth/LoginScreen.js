@@ -12,9 +12,8 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
-import * as ScreenOrientation from "expo-screen-orientation";
-
-console.log(ScreenOrientation.getOrientationAsync());
+import { useDispatch } from "react-redux";
+import { authLogin } from "../../redux/auth/authOperations";
 
 const initialFormData = {
   email: "",
@@ -25,10 +24,12 @@ export default function LoginScreen({ navigation }) {
   const [formData, setFormData] = useState(initialFormData);
   const [keyboardShown, setKeyboardShown] = useState(false);
 
+  const dispatch = useDispatch();
+
   const handleSubmit = () => {
     setKeyboardShown(false);
     Keyboard.dismiss();
-    console.log(formData);
+    dispatch(authLogin(formData));
     setFormData(initialFormData);
   };
 

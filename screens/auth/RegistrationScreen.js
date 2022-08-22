@@ -12,6 +12,8 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { authRegister } from "../../redux/auth/authOperations";
 
 const initialFormData = {
   name: "",
@@ -23,10 +25,13 @@ export default function RegistrationScreen({ navigation }) {
   const [formData, setFormData] = useState(initialFormData);
   const [keyboardShown, setKeyboardShown] = useState(false);
 
+  const dispatch = useDispatch();
+
   const handleSubmit = () => {
     setKeyboardShown(false);
     Keyboard.dismiss();
-    console.log(formData);
+    // console.log(formData);
+    dispatch(authRegister(formData));
     setFormData(initialFormData);
   };
 
