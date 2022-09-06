@@ -1,32 +1,121 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, Text, View, FlatList, Image, Button } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+} from "react-native";
+import { EvilIcons } from "@expo/vector-icons";
+import db from "../../firebase/config";
 
-export default function HomeScreen({ route, navigation }) {
+export default function HomeScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    if (route.params) {
-      setPosts((prevState) => [...prevState, route.params]);
-      console.log("posts", posts);
-    }
-  }, [route.params]);
+    getAllPosts();
+  }, []);
+
+  const getAllPosts = async () => {
+    await db
+      .firestore()
+      .collection("posts")
+      .onSnapshot((data) =>
+        setPosts(
+          data.docs
+            .map((doc) => ({ ...doc.data(), id: doc.id }))
+            .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        )
+      );
+  };
+
+  const createLike = async (postId) => {
+    const data = await db.firestore().collection("posts").doc(postId).get();
+    const { likes } = data.data();
+    await db
+      .firestore()
+      .collection("posts")
+      .doc(postId)
+      .update({ likes: (likes ? likes : 0) + 1 });
+  };
 
   return (
     <View style={styles.container}>
       <FlatList
-        // style={{ marginTop: 32 }}
         data={posts}
-        keyExtractor={(item, idx) => idx.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
-            <Image style={styles.postImage} source={{ uri: item.photo }} />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() =>
+                navigation.navigate("Comments", {
+                  postId: item.id,
+                  photo: item.photo,
+                  title: item.title,
+                  allComments: item.comments,
+                })
+              }
+            >
+              <Image style={styles.postImage} source={{ uri: item.photo }} />
+            </TouchableOpacity>
+            <View style={{ marginTop: 8 }}>
+              <Text style={styles.postImageTitle}>{item.title}</Text>
+            </View>
+            <View style={styles.postInfoContainer}>
+              <View style={{ flexDirection: "row" }}>
+                <TouchableOpacity
+                  style={{ ...styles.postInfoButton, marginRight: 24 }}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    navigation.navigate("Comments", {
+                      postId: item.id,
+                      photo: item.photo,
+                      title: item.title,
+                      allComments: item.comments,
+                    })
+                  }
+                >
+                  <EvilIcons
+                    name="comment"
+                    size={32}
+                    color={item.comments?.length ? "#FF6C00" : "#BDBDBD"}
+                  />
+                  <Text style={styles.postInfoText}>
+                    {item.comments?.length || 0}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.postInfoButton}
+                  activeOpacity={0.8}
+                  onPress={() => createLike(item.id)}
+                >
+                  <EvilIcons
+                    name="like"
+                    size={36}
+                    color={item.likes ? "#FF6C00" : "#BDBDBD"}
+                  />
+                  <Text style={styles.postInfoText}>{item.likes || 0}</Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                style={styles.postInfoButton}
+                activeOpacity={0.8}
+                onPress={() =>
+                  navigation.navigate("Map", {
+                    location: item.location,
+                  })
+                }
+              >
+                <EvilIcons name="location" size={32} color="#BDBDBD" />
+                <Text style={styles.postInfoText}>
+                  {`${item.address?.city}, ${item.address?.country}`}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
-      />
-      <Button title="Go to map" onPress={() => navigation.navigate("Map")} />
-      <Button
-        title="Go to Comments"
-        onPress={() => navigation.navigate("Comments")}
       />
     </View>
   );
@@ -36,19 +125,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    // justifyContent: "center",
-    // alignItems: "center",
   },
   postContainer: {
-    // height: 240,
     marginHorizontal: 16,
     marginTop: 32,
-    // borderRadius: 8,
-    // justifyContent: "center",
-    // alignItems: "center",
   },
   postImage: {
     height: 240,
     borderRadius: 8,
+    resizeMode: "cover",
+  },
+  postImageTitle: {
+    fontFamily: "Roboto-Medium",
+    fontSize: 16,
+    color: "#212121",
+  },
+  postInfoContainer: {
+    marginTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  postInfoButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  postInfoText: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 16,
+    color: "#212121",
   },
 });

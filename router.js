@@ -1,4 +1,4 @@
-import { StyleSheet, Image, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -6,7 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import RegistrationScreen from "./screens/auth/RegistrationScreen";
 import LoginScreen from "./screens/auth/LoginScreen";
 import PostsScreen from "./screens/main/PostsScreen";
-import CreatePostsScreen from "./screens/main/CreatePostsScreen";
+import CreatePostScreen from "./screens/main/CreatePostScreen";
 import ProfileScreen from "./screens/main/ProfileScreen";
 
 const AuthStack = createStackNavigator();
@@ -61,17 +61,25 @@ export default function useRoute(isAuth) {
       />
       <MainTab.Screen
         name="Create"
-        component={CreatePostsScreen}
-        options={{
-          headerShown: false,
+        component={CreatePostScreen}
+        options={({ navigation }) => ({
+          title: "Создать публикацию",
+          headerLeft: () => (
+            <TouchableOpacity
+              style={{ marginLeft: 10 }}
+              onPress={() => navigation.navigate("Home")}
+            >
+              <Ionicons name="arrow-back" size={36} color="#BDBDBD" />
+            </TouchableOpacity>
+          ),
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name="add-outline"
-              size={focused ? 32 : 24}
+              size={focused ? 40 : 32}
               color={focused ? "#FFFFFF" : "#212121"}
             />
           ),
-        }}
+        })}
       />
       <MainTab.Screen
         name="Profile"
@@ -90,10 +98,3 @@ export default function useRoute(isAuth) {
     </MainTab.Navigator>
   );
 }
-
-// const styles = StyleSheet.create({
-//   tabBarIcon: {
-//     width: 40,
-//     height: 40,
-//   },
-// });

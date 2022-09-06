@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
@@ -30,7 +30,6 @@ export default function RegistrationScreen({ navigation }) {
   const handleSubmit = () => {
     setKeyboardShown(false);
     Keyboard.dismiss();
-    // console.log(formData);
     dispatch(authRegister(formData));
     setFormData(initialFormData);
   };
@@ -150,7 +149,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
-    padding: 16,
+    paddingLeft: 16,
     marginBottom: 16,
     fontFamily: "Roboto-Regular",
     fontSize: 16,

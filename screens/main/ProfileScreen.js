@@ -1,26 +1,53 @@
-import { StyleSheet, Text, View } from "react-native";
+import { TouchableOpacity } from "react-native";
+import { createStackNavigator } from "@react-navigation/stack";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
+import UserScreen from "../nested/UserScreen";
+import CommentsScreen from "../nested/CommentsScreen";
+import MapScreen from "../nested/MapScreen";
+
+const NestedStack = createStackNavigator();
 
 export default function ProfileScreen() {
   return (
-    <View style={styles.container}>
-      <Text>ProfileScreen</Text>
-    </View>
+    <NestedStack.Navigator>
+      <NestedStack.Screen
+        name="User"
+        component={UserScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <NestedStack.Screen
+        name="Comments"
+        component={CommentsScreen}
+        options={({ navigation }) => ({
+          title: "Комментарии",
+          headerLeft: () => (
+            <TouchableOpacity
+              style={{ marginLeft: 10 }}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={36} color="#BDBDBD" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <NestedStack.Screen
+        name="Map"
+        component={MapScreen}
+        options={({ navigation }) => ({
+          title: "Карта",
+          headerLeft: () => (
+            <TouchableOpacity
+              style={{ marginLeft: 10 }}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={36} color="#BDBDBD" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+    </NestedStack.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    marginBottom: 33,
-    fontFamily: "Roboto-Medium",
-    fontSize: 24,
-    textAlign: "center",
-    textTransform: "uppercase",
-    color: "#212121",
-  },
-});
