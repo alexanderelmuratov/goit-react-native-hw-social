@@ -2,7 +2,8 @@
 import db from "../../firebase/config";
 import { authSlice } from "./authReducer";
 
-const { updateUserProfile, changeAuthState, logoutUser } = authSlice.actions;
+const { updateUserProfile, changeAuthState, logoutUser, updateUserAvatar } =
+  authSlice.actions;
 
 export const authRegister =
   ({ name, email, password }) =>
@@ -10,7 +11,6 @@ export const authRegister =
     try {
       await db.auth().createUserWithEmailAndPassword(email, password);
       const user = await db.auth().currentUser;
-      console.log("user", user);
       await user.updateProfile({
         displayName: name,
       });
@@ -41,6 +41,15 @@ export const authLogout = () => async (dispatch, getState) => {
   dispatch(logoutUser());
 };
 
+export const authAvatarChange = (avatar) => async (dispatch, getState) => {
+  const user = await db.auth().currentUser;
+  await user.updateProfile({
+    photoURL: avatar,
+  });
+  const { photoURL } = await db.auth().currentUser;
+  dispatch(updateUserAvatar({ avatar: photoURL }));
+};
+
 export const authStateChange = () => async (dispatch, getState) => {
   await db.auth().onAuthStateChanged((user) => {
     console.log("user", user);
@@ -51,6 +60,7 @@ export const authStateChange = () => async (dispatch, getState) => {
           userId: user.uid,
           name: user.displayName,
           email: user.email,
+          avatar: user.photoURL,
         })
       );
     }

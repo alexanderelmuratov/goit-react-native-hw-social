@@ -1,8 +1,7 @@
 import { useDispatch } from "react-redux";
 import { TouchableOpacity } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import Entypo from "@expo/vector-icons/Entypo";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 
 import HomeScreen from "../nested/HomeScreen";
 import CommentsScreen from "../nested/CommentsScreen";

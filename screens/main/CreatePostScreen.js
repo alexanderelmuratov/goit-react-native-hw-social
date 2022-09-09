@@ -16,8 +16,7 @@ import { Camera, CameraType } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import db from "../../firebase/config";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { EvilIcons } from "@expo/vector-icons";
+import { MaterialIcons, EvilIcons } from "@expo/vector-icons";
 
 export default function CreatePostScreen({ navigation }) {
   const [type, setType] = useState(CameraType.back);
@@ -64,12 +63,18 @@ export default function CreatePostScreen({ navigation }) {
     }
   };
 
+  const cancelPhoto = () => {
+    setPhoto(null);
+    setTitle("");
+    setAddressValue(null);
+  };
+
   const uploadPhotoToServer = async () => {
     const response = await fetch(photo);
     const file = await response.blob();
     const postId = Date.now().toString();
     await db.storage().ref(`postImages/${postId}`).put(file);
-    const processedPhoto = db
+    const processedPhoto = await db
       .storage()
       .ref("postImages")
       .child(postId)
@@ -77,7 +82,7 @@ export default function CreatePostScreen({ navigation }) {
     return processedPhoto;
   };
 
-  const uploadPostToServer = async () => {
+  const createPost = async () => {
     const createdAt = new Date();
     const photo = await uploadPhotoToServer();
     await db.firestore().collection("posts").add({
@@ -91,9 +96,9 @@ export default function CreatePostScreen({ navigation }) {
     });
   };
 
-  const sendPhoto = () => {
-    if (!photo) return;
-    uploadPostToServer();
+  const sendPost = () => {
+    if (!photo || !title || !addressValue) return;
+    createPost();
     navigation.navigate("Home");
     setPhoto(null);
     setTitle("");
@@ -113,29 +118,18 @@ export default function CreatePostScreen({ navigation }) {
             {photo && location ? (
               <View style={styles.photoContainer}>
                 <TouchableOpacity
-                  style={{
-                    position: "absolute",
-                    top: 10,
-                    right: 10,
-                    zIndex: 100,
-                  }}
-                  onPress={() => setPhoto(null)}
+                  style={styles.cancelPhotoButton}
+                  onPress={cancelPhoto}
                 >
                   <MaterialIcons name="close" size={40} color="#BDBDBD" />
                 </TouchableOpacity>
-                <Image
-                  style={{
-                    height: 440,
-                    borderRadius: 8,
-                    resizeMode: "cover",
-                  }}
-                  source={{ uri: photo }}
-                />
+                <Image style={styles.photo} source={{ uri: photo }} />
               </View>
             ) : (
               <Camera
                 style={styles.camera}
                 type={type}
+                flashMode="auto"
                 ref={(ref) => setCamera(ref)}
               >
                 <TouchableOpacity
@@ -208,11 +202,6 @@ export default function CreatePostScreen({ navigation }) {
                 style={{ position: "absolute", top: 76, left: 5 }}
                 activeOpacity={0.8}
                 onPress={() => setAddressValue(address)}
-                // onPress={() =>
-                //   navigation.navigate("Map", {
-                //     location: location.coords,
-                //   })
-                // }
               >
                 <EvilIcons name="location" size={40} color="#BDBDBD" />
               </TouchableOpacity>
@@ -221,7 +210,8 @@ export default function CreatePostScreen({ navigation }) {
               <TouchableOpacity
                 style={styles.sendButton}
                 activeOpacity={0.8}
-                onPress={sendPhoto}
+                onPress={sendPost}
+                disabled={!photo || !title || !addressValue}
               >
                 <Text style={styles.sendButtonTitle}>Опубликовать</Text>
               </TouchableOpacity>
@@ -243,7 +233,6 @@ const styles = StyleSheet.create({
     position: "relative",
     height: 440,
     marginHorizontal: 16,
-    // marginTop: 20,
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
@@ -275,6 +264,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 32,
     borderRadius: 8,
+  },
+  photo: {
+    height: 440,
+    borderRadius: 8,
+    resizeMode: "cover",
+  },
+  cancelPhotoButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 100,
   },
   inputWrapper: {
     position: "relative",

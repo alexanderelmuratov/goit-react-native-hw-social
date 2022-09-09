@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   StyleSheet,
   View,
   Text,
-  FlatList,
+  ImageBackground,
   Image,
+  FlatList,
   TouchableOpacity,
 } from "react-native";
 import { EvilIcons } from "@expo/vector-icons";
@@ -12,6 +14,8 @@ import db from "../../firebase/config";
 
 export default function HomeScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
+
+  const { name, email, avatar } = useSelector((state) => state.auth);
 
   useEffect(() => {
     getAllPosts();
@@ -42,6 +46,26 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.avatarWrapper}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate("User")}
+      >
+        <View style={{ overflow: "hidden", borderRadius: 16 }}>
+          <ImageBackground
+            style={styles.defaultAvatar}
+            source={require("../../assets/images/default-avatar.jpg")}
+          >
+            {avatar && (
+              <Image style={styles.userAvatar} source={{ uri: avatar }} />
+            )}
+          </ImageBackground>
+        </View>
+        <View style={styles.userInfoWrapper}>
+          <Text style={styles.userName}>{name}</Text>
+          <Text style={styles.userEmail}>{email}</Text>
+        </View>
+      </TouchableOpacity>
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
@@ -60,8 +84,9 @@ export default function HomeScreen({ navigation }) {
             >
               <Image style={styles.postImage} source={{ uri: item.photo }} />
             </TouchableOpacity>
-            <View style={{ marginTop: 8 }}>
+            <View style={styles.postImageInfoWrapper}>
               <Text style={styles.postImageTitle}>{item.title}</Text>
+              <Text style={styles.postImageAuthor}>Автор: {item.name}</Text>
             </View>
             <View style={styles.postInfoContainer}>
               <View style={{ flexDirection: "row" }}>
@@ -126,19 +151,61 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  avatarWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginVertical: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    borderTopRightRadius: 16,
+    borderBottomRightRadius: 16,
+  },
+  defaultAvatar: {
+    width: 60,
+    height: 60,
+    resizeMode: "cover",
+  },
+  userAvatar: {
+    width: 60,
+    height: 60,
+    resizeMode: "cover",
+  },
+  userInfoWrapper: {
+    marginLeft: 10,
+  },
+  userName: {
+    fontFamily: "Roboto-Bold",
+    fontSize: 13,
+    color: "#212121",
+  },
+  userEmail: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 11,
+    color: "rgba(33, 33, 33, 0.8)",
+  },
   postContainer: {
     marginHorizontal: 16,
-    marginTop: 32,
+    marginVertical: 16,
   },
   postImage: {
     height: 240,
     borderRadius: 8,
     resizeMode: "cover",
   },
+  postImageInfoWrapper: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
   postImageTitle: {
     fontFamily: "Roboto-Medium",
     fontSize: 16,
     color: "#212121",
+  },
+  postImageAuthor: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 16,
+    color: "#BDBDBD",
   },
   postInfoContainer: {
     marginTop: 8,

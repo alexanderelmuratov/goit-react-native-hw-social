@@ -10,16 +10,15 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import Entypo from "@expo/vector-icons/Entypo";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { EvilIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { Entypo, MaterialIcons, EvilIcons } from "@expo/vector-icons";
 import db from "../../firebase/config";
-import { authLogout } from "../../redux/auth/authOperations";
+import { authAvatarChange, authLogout } from "../../redux/auth/authOperations";
 
 export default function UserScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
 
-  const { userId, name, email } = useSelector((state) => state.auth);
+  const { userId, name, email, avatar } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const logout = () => dispatch(authLogout());
@@ -57,12 +56,68 @@ export default function UserScreen({ navigation }) {
       .update({ likes: (likes ? likes : 0) + 1 });
   };
 
+  const pickAvatar = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0,
+    });
+
+    if (!result.cancelled) {
+      const avatar = await uploadAvatarToServer(result.uri);
+      dispatch(authAvatarChange(avatar));
+    }
+  };
+
+  const uploadAvatarToServer = async (photo) => {
+    const response = await fetch(photo);
+    const file = await response.blob();
+    const avatarId = Date.now().toString();
+    await db.storage().ref(`avatars/${avatarId}`).put(file);
+
+    const processedAvatar = await db
+      .storage()
+      .ref("avatars")
+      .child(avatarId)
+      .getDownloadURL();
+    return processedAvatar;
+  };
+
+  const deleteAvatar = async () => {
+    dispatch(authAvatarChange(null));
+    await db.storage().refFromURL(avatar).delete();
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground
         style={styles.bgImage}
         source={require("../../assets/images/nature.jpg")}
       >
+        <View style={styles.avatarWrapper}>
+          <View style={{ overflow: "hidden", borderRadius: 16 }}>
+            <ImageBackground
+              style={styles.defaultAvatar}
+              source={require("../../assets/images/default-avatar.jpg")}
+            >
+              {avatar && (
+                <Image style={styles.userAvatar} source={{ uri: avatar }} />
+              )}
+            </ImageBackground>
+          </View>
+          {avatar ? (
+            <TouchableOpacity
+              style={{ ...styles.avatarButton, borderColor: "#BDBDBD" }}
+              onPress={deleteAvatar}
+            >
+              <MaterialIcons name="close" size={26} color="#BDBDBD" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.avatarButton} onPress={pickAvatar}>
+              <MaterialIcons name="add" size={26} color="#FF6C00" />
+            </TouchableOpacity>
+          )}
+        </View>
         <View style={styles.profileWrapper}>
           <TouchableOpacity style={styles.logoutButton} onPress={logout}>
             <Entypo name="log-out" size={30} color="#BDBDBD" />
@@ -175,6 +230,35 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "flex-end",
   },
+  avatarWrapper: {
+    position: "absolute",
+    alignSelf: "center",
+    top: "15%",
+    zIndex: 100,
+  },
+  defaultAvatar: {
+    width: 120,
+    height: 120,
+    resizeMode: "cover",
+  },
+  userAvatar: {
+    width: 120,
+    height: 120,
+    resizeMode: "cover",
+  },
+  avatarButton: {
+    position: "absolute",
+    bottom: 10,
+    right: -16,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 30,
+    height: 30,
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#FF6C00",
+    borderRadius: 50,
+  },
   profileWrapper: {
     height: 660,
     backgroundColor: "#fff",
@@ -187,7 +271,7 @@ const styles = StyleSheet.create({
     right: 16,
   },
   profileNameWrapper: {
-    marginTop: 60,
+    marginTop: 65,
     marginBottom: 5,
   },
   profileName: {
@@ -197,17 +281,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   profileEmailWrapper: {
-    marginBottom: 32,
+    marginBottom: 5,
   },
   profileEmail: {
     fontFamily: "Roboto-Medium",
-    fontSize: 18,
+    fontSize: 16,
     color: "#BDBDBD",
     textAlign: "center",
   },
   postContainer: {
     marginHorizontal: 16,
-    marginTop: 32,
+    marginVertical: 16,
   },
   deletePostButton: {
     position: "absolute",

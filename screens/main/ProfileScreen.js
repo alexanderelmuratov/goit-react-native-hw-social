@@ -1,6 +1,6 @@
 import { TouchableOpacity } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 
 import UserScreen from "../nested/UserScreen";
 import CommentsScreen from "../nested/CommentsScreen";
