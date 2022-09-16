@@ -53,12 +53,10 @@ export default function HomeScreen({ navigation }) {
       >
         <View style={{ overflow: "hidden", borderRadius: 16 }}>
           <ImageBackground
-            style={styles.defaultAvatar}
+            style={styles.avatar}
             source={require("../../assets/images/default-avatar.jpg")}
           >
-            {avatar && (
-              <Image style={styles.userAvatar} source={{ uri: avatar }} />
-            )}
+            {avatar && <Image style={styles.avatar} source={{ uri: avatar }} />}
           </ImageBackground>
         </View>
         <View style={styles.userInfoWrapper}>
@@ -160,12 +158,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     borderBottomRightRadius: 16,
   },
-  defaultAvatar: {
-    width: 60,
-    height: 60,
-    resizeMode: "cover",
-  },
-  userAvatar: {
+  avatar: {
     width: 60,
     height: 60,
     resizeMode: "cover",

@@ -211,7 +211,6 @@ export default function CreatePostScreen({ navigation }) {
                 style={styles.sendButton}
                 activeOpacity={0.8}
                 onPress={sendPost}
-                disabled={!photo || !title || !addressValue}
               >
                 <Text style={styles.sendButtonTitle}>Опубликовать</Text>
               </TouchableOpacity>

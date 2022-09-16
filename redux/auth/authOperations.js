@@ -1,4 +1,3 @@
-// import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import db from "../../firebase/config";
 import { authSlice } from "./authReducer";
 
@@ -52,7 +51,6 @@ export const authAvatarChange = (avatar) => async (dispatch, getState) => {
 
 export const authStateChange = () => async (dispatch, getState) => {
   await db.auth().onAuthStateChanged((user) => {
-    console.log("user", user);
     if (user) {
       dispatch(changeAuthState({ stateChange: true }));
       dispatch(

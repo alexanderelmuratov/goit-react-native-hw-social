@@ -97,11 +97,11 @@ export default function UserScreen({ navigation }) {
         <View style={styles.avatarWrapper}>
           <View style={{ overflow: "hidden", borderRadius: 16 }}>
             <ImageBackground
-              style={styles.defaultAvatar}
+              style={styles.avatar}
               source={require("../../assets/images/default-avatar.jpg")}
             >
               {avatar && (
-                <Image style={styles.userAvatar} source={{ uri: avatar }} />
+                <Image style={styles.avatar} source={{ uri: avatar }} />
               )}
             </ImageBackground>
           </View>
@@ -236,12 +236,7 @@ const styles = StyleSheet.create({
     top: "15%",
     zIndex: 100,
   },
-  defaultAvatar: {
-    width: 120,
-    height: 120,
-    resizeMode: "cover",
-  },
-  userAvatar: {
+  avatar: {
     width: 120,
     height: 120,
     resizeMode: "cover",

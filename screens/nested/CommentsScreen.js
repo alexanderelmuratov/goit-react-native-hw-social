@@ -5,6 +5,7 @@ import {
   View,
   Text,
   TextInput,
+  ImageBackground,
   Image,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -24,7 +25,7 @@ export default function CommentsScreen({ route }) {
   const [comments, setComments] = useState(allComments || []);
   const [keyboardShown, setKeyboardShown] = useState(false);
 
-  const { name } = useSelector((state) => state.auth);
+  const { name, avatar } = useSelector((state) => state.auth);
 
   const keyboardHide = () => {
     setKeyboardShown(false);
@@ -33,16 +34,22 @@ export default function CommentsScreen({ route }) {
 
   const createComment = async () => {
     const createdAt = new Date();
-    await db
-      .firestore()
-      .collection("posts")
-      .doc(postId)
-      .update({
-        comments: [
-          ...comments,
-          { newComment, name, createdAt: createdAt.toLocaleString() },
-        ],
-      });
+    newComment.trim() &&
+      (await db
+        .firestore()
+        .collection("posts")
+        .doc(postId)
+        .update({
+          comments: [
+            ...comments,
+            {
+              newComment,
+              name,
+              avatar,
+              createdAt: createdAt.toLocaleString(),
+            },
+          ],
+        }));
 
     const data = await db.firestore().collection("posts").doc(postId).get();
     setComments(data.data().comments);
@@ -64,21 +71,36 @@ export default function CommentsScreen({ route }) {
           </View>
         </View>
       </TouchableWithoutFeedback>
-      <SafeAreaView style={styles.commentsListContainer}>
-        {comments && (
+      {comments && (
+        <SafeAreaView style={styles.commentsListContainer}>
           <FlatList
             data={comments}
             keyExtractor={(item, idx) => idx.toString()}
             renderItem={({ item }) => (
-              <View style={styles.commentsContainer}>
-                <Text style={styles.commentAuthor}>{item.name}</Text>
-                <Text style={styles.commentMessage}>{item.newComment}</Text>
-                <Text style={styles.commentDate}>{item.createdAt}</Text>
+              <View style={styles.commentContainer}>
+                <View style={styles.avatarContainer}>
+                  <ImageBackground
+                    style={styles.avatar}
+                    source={require("../../assets/images/default-avatar.jpg")}
+                  >
+                    {item.avatar && (
+                      <Image
+                        style={styles.avatar}
+                        source={{ uri: item.avatar }}
+                      />
+                    )}
+                  </ImageBackground>
+                </View>
+                <View style={styles.comment}>
+                  <Text style={styles.commentAuthor}>{item.name}</Text>
+                  <Text style={styles.commentMessage}>{item.newComment}</Text>
+                  <Text style={styles.commentDate}>{item.createdAt}</Text>
+                </View>
               </View>
             )}
           />
-        )}
-      </SafeAreaView>
+        </SafeAreaView>
+      )}
       <View
         style={{
           ...styles.inputWrapper,
@@ -129,10 +151,27 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
-  commentsContainer: {
-    padding: 16,
+  commentContainer: {
+    flexDirection: "row",
     marginHorizontal: 16,
     marginVertical: 8,
+  },
+  avatarContainer: {
+    width: 30,
+    height: 30,
+    overflow: "hidden",
+    borderRadius: 50,
+    marginRight: 10,
+  },
+  avatar: {
+    width: 30,
+    height: 30,
+    resizeMode: "cover",
+    borderRadius: 50,
+  },
+  comment: {
+    flex: 1,
+    padding: 16,
     backgroundColor: "rgba(0, 0, 0, 0.03)",
     borderRadius: 8,
   },
