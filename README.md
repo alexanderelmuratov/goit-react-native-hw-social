@@ -2,7 +2,7 @@
 
 <!-- # Open camera on your device and scan the code below -->
 
-# 1. Upload Expo Go app
+# 1. Get the Expo Go app from App Store/Play Market
 
 # 2. Open the camera on your device
 
