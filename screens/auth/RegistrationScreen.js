@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useDispatch } from "react-redux";
+import { Ionicons } from "@expo/vector-icons";
 import { authRegister } from "../../redux/auth/authOperations";
 
 const initialFormData = {
@@ -24,8 +25,11 @@ const initialFormData = {
 export default function RegistrationScreen({ navigation }) {
   const [formData, setFormData] = useState(initialFormData);
   const [keyboardShown, setKeyboardShown] = useState(false);
+  const [isSecureEntry, setIsSecureEntry] = useState(true);
 
   const dispatch = useDispatch();
+
+  const toggleSecureEntry = () => setIsSecureEntry(!isSecureEntry);
 
   const handleSubmit = () => {
     setKeyboardShown(false);
@@ -55,43 +59,58 @@ export default function RegistrationScreen({ navigation }) {
                 }}
               >
                 <Text style={styles.title}>Регистрация</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Имя"
-                  onFocus={() => setKeyboardShown(true)}
-                  value={formData.name}
-                  onChangeText={(value) =>
-                    setFormData((prevFormData) => ({
-                      ...prevFormData,
-                      name: value,
-                    }))
-                  }
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Адрес электронной почты"
-                  onFocus={() => setKeyboardShown(true)}
-                  value={formData.email}
-                  onChangeText={(value) =>
-                    setFormData((prevFormData) => ({
-                      ...prevFormData,
-                      email: value,
-                    }))
-                  }
-                />
-                <TextInput
-                  style={{ ...styles.input, marginBottom: 0 }}
-                  placeholder="Пароль"
-                  secureTextEntry={true}
-                  onFocus={() => setKeyboardShown(true)}
-                  value={formData.password}
-                  onChangeText={(value) =>
-                    setFormData((prevFormData) => ({
-                      ...prevFormData,
-                      password: value,
-                    }))
-                  }
-                />
+                <View style={{ position: "relative" }}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Имя"
+                    onFocus={() => setKeyboardShown(true)}
+                    value={formData.name}
+                    onChangeText={(value) =>
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        name: value,
+                      }))
+                    }
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Адрес электронной почты"
+                    onFocus={() => setKeyboardShown(true)}
+                    value={formData.email}
+                    onChangeText={(value) =>
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        email: value,
+                      }))
+                    }
+                  />
+                  <TextInput
+                    style={{ ...styles.input, marginBottom: 0 }}
+                    placeholder="Пароль"
+                    secureTextEntry={isSecureEntry}
+                    onFocus={() => setKeyboardShown(true)}
+                    value={formData.password}
+                    onChangeText={(value) =>
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        password: value,
+                      }))
+                    }
+                  />
+                  {formData.password && (
+                    <TouchableOpacity
+                      style={styles.secureButton}
+                      activeOpacity={0.8}
+                      onPress={toggleSecureEntry}
+                    >
+                      {isSecureEntry ? (
+                        <Ionicons name="eye" size={30} color="#BDBDBD" />
+                      ) : (
+                        <Ionicons name="eye-off" size={30} color="#BDBDBD" />
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </View>
                 <View>
                   <TouchableOpacity
                     style={styles.button}
@@ -158,6 +177,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E8E8E8",
     borderRadius: 8,
+  },
+  secureButton: {
+    position: "absolute",
+    bottom: 10,
+    right: 20,
   },
   button: {
     justifyContent: "center",

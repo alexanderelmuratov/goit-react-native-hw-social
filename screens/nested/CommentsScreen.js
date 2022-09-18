@@ -25,7 +25,7 @@ export default function CommentsScreen({ route }) {
   const [comments, setComments] = useState(allComments || []);
   const [keyboardShown, setKeyboardShown] = useState(false);
 
-  const { name, avatar } = useSelector((state) => state.auth);
+  const { userId, name, avatar } = useSelector((state) => state.auth);
 
   const keyboardHide = () => {
     setKeyboardShown(false);
@@ -33,7 +33,14 @@ export default function CommentsScreen({ route }) {
   };
 
   const createComment = async () => {
-    const createdAt = new Date();
+    const createdAt = new Date().toLocaleString("ru", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    });
+
     newComment.trim() &&
       (await db
         .firestore()
@@ -46,7 +53,8 @@ export default function CommentsScreen({ route }) {
               newComment,
               name,
               avatar,
-              createdAt: createdAt.toLocaleString(),
+              userId,
+              createdAt,
             },
           ],
         }));
@@ -76,28 +84,65 @@ export default function CommentsScreen({ route }) {
           <FlatList
             data={comments}
             keyExtractor={(item, idx) => idx.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.commentContainer}>
-                <View style={styles.avatarContainer}>
-                  <ImageBackground
-                    style={styles.avatar}
-                    source={require("../../assets/images/default-avatar.jpg")}
+            renderItem={({ item }) => {
+              const currentUser = userId === item.userId;
+              return (
+                <View
+                  style={{
+                    ...styles.commentContainer,
+                    flexDirection: currentUser ? "row-reverse" : "row",
+                  }}
+                >
+                  <View
+                    style={{
+                      ...styles.avatarContainer,
+                      marginRight: currentUser ? 0 : 10,
+                      marginLeft: currentUser ? 10 : 0,
+                    }}
                   >
-                    {item.avatar && (
-                      <Image
-                        style={styles.avatar}
-                        source={{ uri: item.avatar }}
-                      />
-                    )}
-                  </ImageBackground>
+                    <ImageBackground
+                      style={styles.avatar}
+                      source={require("../../assets/images/default-avatar.jpg")}
+                    >
+                      {item.avatar && (
+                        <Image
+                          style={styles.avatar}
+                          source={{ uri: item.avatar }}
+                        />
+                      )}
+                    </ImageBackground>
+                  </View>
+                  <View
+                    style={{
+                      ...styles.comment,
+                      backgroundColor: currentUser
+                        ? "rgba(0, 0, 255, 0.03)"
+                        : "rgba(0, 0, 0, 0.03)",
+                      borderTopLeftRadius: currentUser ? 20 : 0,
+                      borderTopRightRadius: currentUser ? 0 : 20,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        ...styles.commentAuthor,
+                        textAlign: currentUser ? "right" : "left",
+                      }}
+                    >
+                      {currentUser ? "Вы" : item.name}
+                    </Text>
+                    <Text style={styles.commentMessage}>{item.newComment}</Text>
+                    <Text
+                      style={{
+                        ...styles.commentDate,
+                        textAlign: currentUser ? "left" : "right",
+                      }}
+                    >
+                      {item.createdAt}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.comment}>
-                  <Text style={styles.commentAuthor}>{item.name}</Text>
-                  <Text style={styles.commentMessage}>{item.newComment}</Text>
-                  <Text style={styles.commentDate}>{item.createdAt}</Text>
-                </View>
-              </View>
-            )}
+              );
+            }}
           />
         </SafeAreaView>
       )}
@@ -152,28 +197,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   commentContainer: {
-    flexDirection: "row",
     marginHorizontal: 16,
     marginVertical: 8,
   },
   avatarContainer: {
-    width: 30,
-    height: 30,
+    width: 50,
+    height: 50,
     overflow: "hidden",
     borderRadius: 50,
-    marginRight: 10,
   },
   avatar: {
-    width: 30,
-    height: 30,
+    width: 50,
+    height: 50,
     resizeMode: "cover",
     borderRadius: 50,
   },
   comment: {
-    flex: 1,
     padding: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.03)",
-    borderRadius: 8,
+    borderRadius: 20,
   },
   commentAuthor: {
     marginBottom: 8,
@@ -190,7 +231,7 @@ const styles = StyleSheet.create({
   commentDate: {
     fontFamily: "Roboto-Regular",
     fontSize: 10,
-    textAlign: "right",
+    // textAlign: "right",
     color: "#BDBDBD",
   },
   inputWrapper: {
