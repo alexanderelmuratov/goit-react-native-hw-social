@@ -231,7 +231,6 @@ const styles = StyleSheet.create({
   commentDate: {
     fontFamily: "Roboto-Regular",
     fontSize: 10,
-    // textAlign: "right",
     color: "#BDBDBD",
   },
   inputWrapper: {

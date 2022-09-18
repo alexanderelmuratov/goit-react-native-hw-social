@@ -5,6 +5,7 @@ import {
   Text,
   View,
   ImageBackground,
+  Image,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -13,8 +14,13 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useDispatch } from "react-redux";
-import { Ionicons } from "@expo/vector-icons";
-import { authRegister } from "../../redux/auth/authOperations";
+import * as ImagePicker from "expo-image-picker";
+import db from "../../firebase/config";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import {
+  authRegister,
+  authAvatarChange,
+} from "../../redux/auth/authOperations";
 
 const initialFormData = {
   name: "",
@@ -24,6 +30,7 @@ const initialFormData = {
 
 export default function RegistrationScreen({ navigation }) {
   const [formData, setFormData] = useState(initialFormData);
+  const [avatar, setAvatar] = useState(null);
   const [keyboardShown, setKeyboardShown] = useState(false);
   const [isSecureEntry, setIsSecureEntry] = useState(true);
 
@@ -31,16 +38,51 @@ export default function RegistrationScreen({ navigation }) {
 
   const toggleSecureEntry = () => setIsSecureEntry(!isSecureEntry);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setKeyboardShown(false);
     Keyboard.dismiss();
     dispatch(authRegister(formData));
     setFormData(initialFormData);
+
+    if (avatar) {
+      const avatarUri = await uploadAvatarToServer(avatar);
+      dispatch(authAvatarChange(avatarUri));
+    }
   };
 
   const keyboardHide = () => {
     setKeyboardShown(false);
     Keyboard.dismiss();
+  };
+
+  const pickAvatar = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0,
+    });
+
+    if (!result.cancelled) {
+      setAvatar(result.uri);
+    }
+  };
+
+  const uploadAvatarToServer = async (photo) => {
+    const response = await fetch(photo);
+    const file = await response.blob();
+    const avatarId = Date.now().toString();
+    await db.storage().ref(`avatars/${avatarId}`).put(file);
+
+    const processedAvatar = await db
+      .storage()
+      .ref("avatars")
+      .child(avatarId)
+      .getDownloadURL();
+    return processedAvatar;
+  };
+
+  const deleteAvatar = async () => {
+    setAvatar(null);
   };
 
   return (
@@ -58,6 +100,33 @@ export default function RegistrationScreen({ navigation }) {
                   marginBottom: keyboardShown ? 32 : 78,
                 }}
               >
+                <View style={styles.avatarWrapper}>
+                  <View style={{ overflow: "hidden", borderRadius: 16 }}>
+                    <ImageBackground
+                      style={styles.avatar}
+                      source={require("../../assets/images/default-avatar.jpg")}
+                    >
+                      {avatar && (
+                        <Image style={styles.avatar} source={{ uri: avatar }} />
+                      )}
+                    </ImageBackground>
+                  </View>
+                  {avatar ? (
+                    <TouchableOpacity
+                      style={{ ...styles.avatarButton, borderColor: "#BDBDBD" }}
+                      onPress={deleteAvatar}
+                    >
+                      <MaterialIcons name="close" size={26} color="#BDBDBD" />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.avatarButton}
+                      onPress={pickAvatar}
+                    >
+                      <MaterialIcons name="add" size={26} color="#FF6C00" />
+                    </TouchableOpacity>
+                  )}
+                </View>
                 <Text style={styles.title}>Регистрация</Text>
                 <View style={{ position: "relative" }}>
                   <TextInput
@@ -162,9 +231,33 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
   },
+  avatarWrapper: {
+    position: "absolute",
+    alignSelf: "center",
+    top: -60,
+    zIndex: 100,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    resizeMode: "cover",
+  },
+  avatarButton: {
+    position: "absolute",
+    bottom: 10,
+    right: -16,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 30,
+    height: 30,
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#FF6C00",
+    borderRadius: 50,
+  },
   form: {
     marginHorizontal: 16,
-    paddingTop: 32,
+    paddingTop: 80,
   },
   input: {
     height: 50,
